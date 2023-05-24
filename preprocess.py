@@ -3,33 +3,33 @@
 import numpy as np
 # import track
 import utils
+from track import Model
 
 
-
-
-class Preprocess():
+class Preprocess(Model):
     def __init__(self,
                  raw_sinogram,
                  ks_quad,
+                 sequence,
                  norm = [0.4, 0.6],
                  plane = 'x'
                  ):
+      
+        super().__init__(sequence,
+                 ks_quad,
+                 norm, 
+                 plane,)
+        
         self.projections_raw = raw_sinogram
         self.projections = raw_sinogram
         self.ks_quad = ks_quad
         self.plane = plane
-        if norm is None:
-            self.V = np.array([[0,1],[1,0]])
-            self.Vi = np.array([[0,1],[1,0]]).T
 
-        else:
-            self.V = utils.norm_matrix(norm[0], norm[1])
-            self.Vi = utils.unnorm_matrix(norm[0], norm[1])
+        
 
         self.n_bins = 128
         self.pixel_size = 0.01
-        self.get_scalings()
-        self.get_angles()
+        self.get_tomo_params()
         self.align_sinogram()
         self.projections = self.center(self.projections)
         self.cent = self.projections.shape[1]//2
@@ -45,7 +45,6 @@ class Preprocess():
     
         goal = np.sum(abs(ref-shift))
         return goal
-
 
     def align_sinogram(self):
         projections_aligned = self.projections.copy()

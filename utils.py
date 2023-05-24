@@ -5,7 +5,7 @@ from scipy import stats
 from skimage.transform import iradon, iradon_sart, radon
 import matplotlib.pyplot as plt
 import odl
-
+import collections
 
 
 
@@ -190,6 +190,12 @@ def load_beam(filename, n_part, alpha, beta, eps, fast = True):
             X_n = repopulate_dist(X_true, n_part, threshold=0)
     return X_n
 
+
+def get_iterable(x):
+    if isinstance(x, collections.Iterable):
+        return x
+    else:
+        return (x,)
 def M_quad(k_quad, l_quad,plane):
     """Transport matrix for quadrupole and drift"""
     s = 0.831693

@@ -25,6 +25,7 @@ class Plot():
                       origin = 'lower')
         axs[1].set_xlabel('r (mmm)')
         axs[1].set_ylabel('$\\theta$ (deg)')
+        axs[1].set_title('y plane')
         plt.tight_layout()
         plt.show()
         return fig, axs
