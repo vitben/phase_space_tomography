@@ -36,7 +36,7 @@ class Preprocess(Model):
         self.range_var = 4*self.get_sino_range()
         self.cut([self.cent-self.range_var//2, self.cent+self.range_var//2])
         self.norm_image()
-        self.unscaled_projections = self.projections
+        
         self.apply_scaling()
     
     def func(self, ks, a, b):
@@ -129,6 +129,7 @@ class Preprocess(Model):
             projs_new_sc.append(proj_n_sc/np.sum(proj_n_sc))
             
         projs_new = np.array(projs_new)
+        self.unscaled_projections = projs_new
         projs_new_sc = self.center(np.array(projs_new_sc))
         self.projections = projs_new_sc
         
@@ -137,4 +138,7 @@ class Preprocess(Model):
 
     def reset_projections(self):
         self.projections = self.projections_raw
+
+    def interpolate_sinogram(self):
+        pass
     

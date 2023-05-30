@@ -108,9 +108,29 @@ class Model():
             self.thetas.append(self.get_theta_norm())
         self.thetas = np.array(self.thetas)
         self.scaling = np.array(self.scaling)
+
+
+
+class Track():
+    def __init__(self,
+                 sequence,
+                 dist = None,
+                 twiss=None):
         
- 
-        
+    
+        self.sequence = sequence
+        self.dist = dist  
+         
+    
+    def track(self):
+        self.n_part = self.dist.shape[0]
+        lattice = Lattice()
+        M = lattice.create_lattice(self.sequence)
+        self.dist_out = self.dist.copy()
+        for p in range(self.n_part):
+            self.dist_out[p,:] = np.dot(M, self.dist[p,:])
+
+
   
 
     # def track(X_true_n, thetas, plane, x_new, Vi, n_bins):

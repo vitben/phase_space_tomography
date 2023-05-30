@@ -6,6 +6,7 @@ from skimage.transform import iradon, iradon_sart, radon
 import matplotlib.pyplot as plt
 import odl
 import collections
+from scipy import optimize
 
 
 
@@ -470,9 +471,6 @@ def evaluate_rec(f_true, edges_rec,  xs,plot = True):
     # Calculate MSE
     mse_e = mse_err(f_true_n, f_rec_n)
     print("The Meas Squared Error between the two images is: {:.1e}".format(mse_e))
-    if plot:
-        plt.figure()
-        mplt.plot_reconstr_diff(f_true_n, f_rec_n, edges_rec)
     return mse_e
 
 
@@ -558,3 +556,45 @@ def gen_dist(hist, n_points, x):
     final_data_x = new_data[indices]
     
     return final_data_x
+
+def gaus(x, a1, mu1, sigma1):
+    return abs(a1) * np.exp(-(1 / 2.) * ((x - mu1) / sigma1) ** 2)
+
+def gaussian_profile_fit(X, Y):
+    mean = np.average(X, weights=np.abs(Y))
+    sigma = np.sqrt(np.average(X ** 2, weights=np.abs(Y)) - mean ** 2)
+    p0 = [Y.max(), mean, sigma]
+
+    try:
+        fit_val, fit_err = optimize.curve_fit(gaus, X, Y, p0=p0)
+    except:
+        fit_val, fit_err = np.zeros((2, 3))
+    else:
+        fit_err = np.sqrt(np.diagonal(fit_err))
+
+    chis_ndf = sum((Y - gaus(X, *fit_val)) ** 2 / gaus(X, *fit_val)) / (len(X) - 3)
+    fit_val[2] = np.abs(fit_val[2])
+    return fit_val, fit_err
+
+def get_twiss(u, pu):
+    """
+    The get_twiss function takes a dataframe and a plane as input.
+    It returns the emittance, alpha, beta and gamma of that plane.
+
+
+    :param data: Specify which data is used to calculate the twiss parameters
+    :param plane: Specify which plane to calculate the twiss parameters for
+    :return: The emittance, alpha, beta and gamma for the given plane
+    :doc-author: Trelent
+    """
+    mu_u = np.mean(u)
+    mu_pu = np.mean(pu)
+    s_u = np.std(u)
+    s_pu = np.std(pu)
+
+    cross = np.mean((u - mu_u) * (pu - mu_pu))
+    eg = np.sqrt(s_u ** 2 * s_pu ** 2 - cross ** 2) 
+    beta = np.mean(u**2)/eg
+    alpha = -np.mean(u*pu)/eg
+    gamma = (1+alpha**2)/beta
+    return eg, alpha, beta, gamma
